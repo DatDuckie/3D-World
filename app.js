@@ -17,6 +17,8 @@ const mediaImage = document.querySelector('#media-image');
 const mediaVideo = document.querySelector('#media-video');
 const mediaAudio = document.querySelector('#media-audio');
 const mediaTitle = document.querySelector('#media-title');
+const vrReticleLeft = document.querySelector('#vr-reticle-left');
+const vrReticleRight = document.querySelector('#vr-reticle-right');
 
 const supportsWebXR = 'xr' in navigator;
 let scene;
@@ -453,9 +455,21 @@ function createHitboxFromForm(event) {
   return created;
 }
 
+function setVrMode(enabled) {
+  document.body.classList.toggle('vr-mode', enabled);
+  if (enabled) {
+    document.body.classList.add('xr-session');
+  } else {
+    document.body.classList.remove('xr-session');
+  }
+  if (vrReticleLeft) vrReticleLeft.style.opacity = enabled ? '1' : '0';
+  if (vrReticleRight) vrReticleRight.style.opacity = enabled ? '1' : '0';
+}
+
 async function startXRSession(mode) {
   if (!supportsWebXR || !navigator.xr) {
-    alert('WebXR is not available in this browser. AR/VR mode will fall back to the mobile camera/orientation view.');
+    setVrMode(mode === 'vr');
+    alert('WebXR is not available in this browser. AR/VR mode will fall back to the stereo split view.');
     return;
   }
 
@@ -470,6 +484,7 @@ async function startXRSession(mode) {
 
     currentXRSession = session;
     xrMode = mode;
+    setVrMode(mode === 'vr');
     document.body.classList.add('xr-session');
     renderer.xr.setReferenceSpaceType('local-floor');
     await renderer.xr.setSession(session);
@@ -477,6 +492,7 @@ async function startXRSession(mode) {
     session.addEventListener('end', () => {
       currentXRSession = null;
       xrMode = 'desktop';
+      setVrMode(false);
       document.body.classList.remove('xr-session');
       renderer.setAnimationLoop(null);
       animate();
@@ -487,7 +503,8 @@ async function startXRSession(mode) {
     });
   } catch (error) {
     console.warn('XR session failed:', error);
-    alert('This device does not support the selected XR mode. The app will continue in standard AR/orientation mode.');
+    setVrMode(mode === 'vr');
+    alert('This device does not support the selected XR mode. The app will continue in the stereo split view.');
   }
 }
 
@@ -502,11 +519,21 @@ function setUpInteractions() {
 
   document.querySelectorAll('[data-xr-mode]').forEach((button) => {
     button.addEventListener('click', () => {
+      const mode = button.dataset.xrMode;
+      if (mode === 'vr') {
+        setVrMode(true);
+        return;
+      }
+      if (mode === 'ar') {
+        setVrMode(false);
+        startXRSession('ar');
+        return;
+      }
       if (currentXRSession) {
         currentXRSession.end();
         return;
       }
-      startXRSession(button.dataset.xrMode);
+      startXRSession(mode);
     });
   });
 

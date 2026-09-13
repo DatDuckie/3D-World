@@ -80,11 +80,34 @@ body.xr-session {
 .css-world {
   position: fixed;
   inset: 0;
+  z-index: 10;
   pointer-events: none;
 }
 
 .css-world > * {
   pointer-events: auto;
+}
+
+.vr-reticle {
+  position: fixed;
+  top: 50%;
+  left: 25%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.75);
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  opacity: 0;
+}
+
+.vr-reticle-right {
+  left: 75%;
+}
+
+body.vr-mode .vr-reticle {
+  opacity: 1;
 }
 
 .permission-button {
@@ -360,6 +383,16 @@ body.vr-mode #vr-camera {
 
 body.vr-mode #shade {
   width: 50%;
+}
+
+body.vr-mode .css-world {
+  z-index: 12;
+}
+
+body.vr-mode .menu-panel,
+body.vr-mode .side-panel,
+body.vr-mode .media-overlay {
+  opacity: 0.95;
 }
 
 @media (max-width: 640px) {
