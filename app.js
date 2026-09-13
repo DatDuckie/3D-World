@@ -61,6 +61,14 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+function createCssAnchor(element, position, scale = 0.0065) {
+  const object = new CSS3DObject(element);
+  object.position.copy(position);
+  object.scale.setScalar(scale);
+  scene.add(object);
+  return object;
+}
+
 function renderFrame() {
   camera.quaternion.slerp(camera.userData.targetQuaternion, 0.12);
   camera.updateMatrixWorld();

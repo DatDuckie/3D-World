@@ -127,7 +127,7 @@ body.vr-mode .vr-reticle {
 }
 
 .floating-panel {
-  position: fixed;
+  position: absolute;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: rgba(12, 26, 35, 0.72);
