@@ -218,20 +218,20 @@ function updateGamepadState() {
 
   const leftStickX = pad.axes[0] ?? 0;
   const leftStickY = pad.axes[1] ?? 0;
-  const startPressed = Boolean(pad.buttons[9]?.pressed || pad.buttons[16]?.pressed);
-  const aPressed = Boolean(pad.buttons[0]?.pressed || pad.buttons[1]?.pressed); 
-  const xPressed = Boolean(pad.buttons[2]?.pressed || pad.buttons[3]?.pressed || pad.buttons[16]?.pressed);
+  const startPressed = Boolean(pad.buttons[9]?.pressed || pad.buttons[8]?.pressed || pad.buttons[16]?.pressed);
+  const aPressed = Boolean(pad.buttons[0]?.pressed || pad.buttons[1]?.pressed || pad.buttons[7]?.pressed);
+  const recenterPressed = Boolean(pad.buttons[3]?.pressed || pad.buttons[2]?.pressed || pad.buttons[16]?.pressed || pad.buttons[10]?.pressed);
 
   if (startPressed && !lastStart) {
     state.menuHolding = !state.menuHolding;
   }
 
   if (state.menuHolding) {
-    state.menuOffset.x = clamp(state.menuOffset.x + leftStickX * 0.04, -1.5, 1.5);
-    state.menuOffset.y = clamp(state.menuOffset.y - leftStickY * 0.04, -1.2, 1.2);
+    state.menuOffset.x = clamp(state.menuOffset.x + leftStickX * 0.05, -1.6, 1.6);
+    state.menuOffset.y = clamp(state.menuOffset.y - leftStickY * 0.05, -1.2, 1.2);
   }
 
-  if (xPressed && !lastX) {
+  if (recenterPressed && !lastRecenter) {
     initialSensorQuaternion = headsetTilt ? headsetTilt.clone() : sensorQuaternion.clone();
   }
 
@@ -241,7 +241,7 @@ function updateGamepadState() {
 
   lastStart = startPressed;
   lastA = aPressed;
-  lastX = xPressed;
+  lastRecenter = recenterPressed;
 }
 
 function addPointToList(point) {
@@ -364,19 +364,29 @@ function closePanel(panelEl) {
 
 function triggerClosestHitbox() {
   if (!state.hitboxes.length) return;
-  const playerPos = camera.position.clone();
+
+  const forward = new THREE.Vector3();
+  camera.getWorldDirection(forward);
+  const origin = camera.position.clone();
   let closest = null;
   let shortest = Infinity;
 
   state.hitboxes.forEach((item) => {
-    const distance = playerPos.distanceTo(item.center);
-    if (distance < shortest) {
-      shortest = distance;
+    const toCenter = item.center.clone().sub(origin);
+    const projection = toCenter.dot(forward);
+    const distance = origin.distanceTo(item.center);
+    if (projection <= 0) return;
+
+    const lateral = toCenter.clone().sub(forward.clone().multiplyScalar(projection)).length();
+    const score = distance + lateral * 0.7;
+
+    if (score < shortest) {
+      shortest = score;
       closest = item;
     }
   });
 
-  if (!closest || shortest > 3.1) return;
+  if (!closest || shortest > 4.1) return;
   openMediaViewer(closest);
 }
 
@@ -524,11 +534,6 @@ function setUpInteractions() {
         setVrMode(true);
         return;
       }
-      if (mode === 'ar') {
-        setVrMode(false);
-        startXRSession('ar');
-        return;
-      }
       if (currentXRSession) {
         currentXRSession.end();
         return;
@@ -582,5 +587,6 @@ window.addEventListener('resize', () => {
 setupScene();
 setUpInteractions();
 requestSensorPermission();
+setVrMode(true);
 setCameraMode('rear');
 renderAssetList();
