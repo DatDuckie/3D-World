@@ -23,14 +23,13 @@
     <div id="vr-reticle-left" class="vr-reticle" aria-hidden="true"></div>
     <div id="vr-reticle-right" class="vr-reticle vr-reticle-right" aria-hidden="true"></div>
 
-    <aside id="xr-menu" class="floating-panel menu-panel" aria-label="XR menu">
-      <span class="panel-kicker">XR</span>
-      <h1>World</h1>
-      <div class="menu-actions">
-        <button type="button" id="toggle-library">Library</button>
-        <button type="button" id="toggle-hitbox">Hitbox</button>
-        <button type="button" data-xr-mode="vr">VR</button>
-        <button type="button" id="recenter-button">Recenter</button>
+    <aside id="xr-menu" class="hud-panel hidden" aria-live="polite" aria-label="XR HUD">
+      <div class="hud-header">XR HUD</div>
+      <div id="hud-lines" class="hud-lines">
+        <div><span class="button-tag">Start</span> toggle HUD</div>
+        <div><span class="button-tag">A</span> open nearest hitbox</div>
+        <div><span class="button-tag">X</span> recenter</div>
+        <div><span class="button-tag">Left Stick</span> move HUD position</div>
       </div>
     </aside>
 

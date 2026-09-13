@@ -8,6 +8,7 @@ const cameraPermission = document.querySelector('#camera-permission');
 const libraryPanel = document.querySelector('#library-panel');
 const hitboxPanel = document.querySelector('#hitbox-panel');
 const mediaOverlay = document.querySelector('#media-overlay');
+const hudPanel = document.querySelector('#xr-menu');
 const assetInput = document.querySelector('#asset-input');
 const assetList = document.querySelector('#asset-list');
 const pointList = document.querySelector('#point-list');
@@ -29,6 +30,7 @@ let renderer;
 let cssRenderer;
 let menuAnchor;
 let mediaAnchor;
+let pointAnchorGroup;
 let sensorListening = false;
 let cameraMode = 'rear';
 let initialSensorQuaternion = null;
@@ -50,6 +52,7 @@ const state = {
   menuHolding: false,
   selectedAssetId: null,
   stereoEnabled: true,
+  hudVisible: false,
 }
 
 const stereoEyeOffset = 0.065;
@@ -69,6 +72,28 @@ function createCssAnchor(element, position, scale = 0.0065) {
   object.scale.setScalar(scale);
   scene.add(object);
   return object;
+}
+
+function getGazePoint(distance = 3.5) {
+  const direction = new THREE.Vector3();
+  camera.getWorldDirection(direction);
+  const origin = camera.position.clone();
+  const point = origin.clone().add(direction.multiplyScalar(distance));
+  return point;
+}
+
+function refreshPointMarkers() {
+  if (!pointAnchorGroup) return;
+  pointAnchorGroup.clear();
+
+  state.points.forEach(([x, y, z]) => {
+    const marker = new THREE.Mesh(
+      new THREE.SphereGeometry(0.05, 12, 12),
+      new THREE.MeshBasicMaterial({ color: '#86f7c8', transparent: true, opacity: 0.9 }),
+    );
+    marker.position.set(x, y, z);
+    pointAnchorGroup.add(marker);
+  });
 }
 
 function renderFrame() {
@@ -122,6 +147,9 @@ function setupScene() {
   const key = new THREE.PointLight(0x7ef3ff, 2.2, 14, 2);
   key.position.set(0, 2.4, 3);
   scene.add(ambient, key);
+
+  pointAnchorGroup = new THREE.Group();
+  scene.add(pointAnchorGroup);
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
   renderer.xr.enabled = true;
@@ -273,12 +301,12 @@ function updateGamepadState() {
   const recenterPressed = Boolean(pad.buttons[3]?.pressed || pad.buttons[2]?.pressed || pad.buttons[16]?.pressed || pad.buttons[10]?.pressed);
 
   if (startPressed && !lastStart) {
-    state.menuHolding = !state.menuHolding;
+    setHudVisible(!state.hudVisible);
   }
 
-  if (state.menuHolding) {
-    state.menuOffset.x = clamp(state.menuOffset.x + leftStickX * 0.05, -1.6, 1.6);
-    state.menuOffset.y = clamp(state.menuOffset.y - leftStickY * 0.05, -1.2, 1.2);
+  if (state.hudVisible) {
+    state.menuOffset.x = clamp(state.menuOffset.x + leftStickX * 0.02, -1.2, 1.2);
+    state.menuOffset.y = clamp(state.menuOffset.y - leftStickY * 0.02, -0.8, 0.8);
   }
 
   if (recenterPressed && !lastRecenter) {
@@ -297,6 +325,7 @@ function updateGamepadState() {
 function addPointToList(point) {
   const index = state.points.length;
   state.points.push(point);
+  refreshPointMarkers();
 
   const pill = document.createElement('div');
   pill.className = 'point-pill';
@@ -305,6 +334,7 @@ function addPointToList(point) {
   pill.querySelector('button').addEventListener('click', () => {
     state.points.splice(index, 1);
     refreshPointList();
+    refreshPointMarkers();
   });
 
   pointList.appendChild(pill);
@@ -319,6 +349,7 @@ function refreshPointList() {
     pill.querySelector('button').addEventListener('click', () => {
       state.points.splice(index, 1);
       refreshPointList();
+      refreshPointMarkers();
     });
     pointList.appendChild(pill);
   });
@@ -503,8 +534,15 @@ function createHitboxFromForm(event) {
   hitboxNameInput.value = '';
   state.points = [];
   refreshPointList();
+  refreshPointMarkers();
 
   return created;
+}
+
+function setHudVisible(visible) {
+  state.hudVisible = visible;
+  if (!hudPanel) return;
+  hudPanel.classList.toggle('hidden', !visible);
 }
 
 function setVrMode(enabled) {
@@ -516,6 +554,9 @@ function setVrMode(enabled) {
   }
   if (vrReticleLeft) vrReticleLeft.style.opacity = enabled ? '1' : '0';
   if (vrReticleRight) vrReticleRight.style.opacity = enabled ? '1' : '0';
+  if (hudPanel && !enabled) {
+    setHudVisible(false);
+  }
 }
 
 async function startXRSession(mode) {
@@ -602,13 +643,11 @@ function setUpInteractions() {
   hitboxForm.addEventListener('submit', createHitboxFromForm);
 
   document.querySelector('#add-point').addEventListener('click', () => {
-    const x = Number(document.querySelector('#point-x').value);
-    const y = Number(document.querySelector('#point-y').value);
-    const z = Number(document.querySelector('#point-z').value);
-    if (Number.isNaN(x) || Number.isNaN(y) || Number.isNaN(z)) {
-      alert('Point values must be valid numbers.');
-      return;
-    }
+    const gazePoint = getGazePoint();
+    const x = Number(gazePoint.x.toFixed(2));
+    const y = Number(gazePoint.y.toFixed(2));
+    const z = Number(gazePoint.z.toFixed(2));
+
     addPointToList([x, y, z]);
   });
 
@@ -629,6 +668,7 @@ window.addEventListener('resize', () => {
 setupScene();
 setUpInteractions();
 requestSensorPermission();
+setHudVisible(false);
 setVrMode(true);
 setCameraMode('rear');
 renderAssetList();
