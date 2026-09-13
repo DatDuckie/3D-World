@@ -127,7 +127,7 @@ body.vr-mode .vr-reticle {
 }
 
 .floating-panel {
-  position: absolute;
+  position: fixed;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: rgba(12, 26, 35, 0.72);
@@ -140,12 +140,13 @@ body.vr-mode .vr-reticle {
 }
 
 .menu-panel {
-  z-index: 15;
-  width: min(290px, 76vw);
+  z-index: 30;
+  width: min(230px, 46vw);
   padding: 1rem 1rem 1.1rem;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  right: 22px;
+  top: 22px;
+  left: auto;
+  transform: none;
   background: rgba(12, 18, 23, 0.72);
 }
 
@@ -211,11 +212,12 @@ body.vr-mode .vr-reticle {
 .secondary-button { background: rgba(255,255,255,0.04); }
 
 .side-panel {
-  z-index: 20;
-  width: min(360px, 82vw);
+  z-index: 25;
+  width: min(320px, 82vw);
   padding: 1rem;
-  left: 1.2rem;
-  top: 1.2rem;
+  right: 22px;
+  top: 22px;
+  left: auto;
 }
 
 .side-panel.hidden,
@@ -345,7 +347,7 @@ body.vr-mode .vr-reticle {
 }
 
 .media-overlay {
-  z-index: 25;
+  z-index: 35;
   width: min(720px, 84vw);
   left: 50%;
   top: 50%;

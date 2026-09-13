@@ -105,8 +105,6 @@ function renderFrame() {
     renderer.render(scene, camera);
   }
 
-  updateMenuTransform();
-  updateMediaTransform();
   updateGamepadState();
   cssRenderer.render(scene, camera);
 }
@@ -141,12 +139,16 @@ function setupScene() {
 
   if (menuEl) {
     menuEl.style.pointerEvents = 'auto';
-    menuAnchor = createCssAnchor(menuEl, new THREE.Vector3(0, 0.4, -2.6));
+    menuEl.style.position = 'fixed';
+    menuEl.style.right = '22px';
+    menuEl.style.top = '22px';
+    menuEl.style.left = 'auto';
+    menuEl.style.transform = 'none';
   }
 
   if (mediaEl) {
     mediaEl.style.pointerEvents = 'auto';
-    mediaAnchor = createCssAnchor(mediaEl, new THREE.Vector3(0, 0.25, -2.6));
+    mediaEl.style.position = 'fixed';
   }
 
   animate();
