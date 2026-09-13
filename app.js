@@ -20,6 +20,8 @@ const mediaAudio = document.querySelector('#media-audio');
 const mediaTitle = document.querySelector('#media-title');
 const vrReticleLeft = document.querySelector('#vr-reticle-left');
 const vrReticleRight = document.querySelector('#vr-reticle-right');
+const hudLeftText = document.querySelector('#hud-left-text');
+const hudRightText = document.querySelector('#hud-right-text');
 const hudPanels = [document.querySelector('#hud-left'), document.querySelector('#hud-right')].filter(Boolean);
 
 const supportsWebXR = 'xr' in navigator;
@@ -40,6 +42,7 @@ let lastA = false;
 let lastStart = false;
 let lastRecenter = false;
 let lastX = false;
+let lastLeftStickClick = false;
 let activeMedia = null;
 let currentXRSession = null;
 let xrMode = 'desktop';
@@ -300,6 +303,7 @@ function updateGamepadState() {
   const leftStickY = pad.axes[1] ?? 0;
   const startPressed = Boolean(pad.buttons[9]?.pressed || pad.buttons[8]?.pressed || pad.buttons[16]?.pressed);
   const aPressed = Boolean(pad.buttons[0]?.pressed || pad.buttons[1]?.pressed || pad.buttons[7]?.pressed);
+  const xPressed = Boolean(pad.buttons[2]?.pressed || pad.buttons[3]?.pressed);
   const leftStickClickPressed = Boolean(pad.buttons[10]?.pressed || pad.buttons[11]?.pressed);
   const recenterPressed = Boolean(pad.buttons[3]?.pressed || pad.buttons[2]?.pressed || pad.buttons[16]?.pressed || pad.buttons[10]?.pressed);
 
@@ -309,6 +313,7 @@ function updateGamepadState() {
 
   if (leftStickClickPressed && !lastLeftStickClick) {
     state.hitboxPlacementMode = !state.hitboxPlacementMode;
+    updateHudStatus();
   }
 
   if (state.hudVisible) {
@@ -320,11 +325,16 @@ function updateGamepadState() {
     initialSensorQuaternion = headsetTilt ? headsetTilt.clone() : sensorQuaternion.clone();
   }
 
+  if (state.hitboxPlacementMode && xPressed && !lastX) {
+    finishHitboxPlacement();
+  }
+
   if (aPressed && !lastA) {
     if (state.hitboxPlacementMode) {
       const gazePoint = getGazePoint();
       const point = [Number(gazePoint.x.toFixed(2)), Number(gazePoint.y.toFixed(2)), Number(gazePoint.z.toFixed(2))];
       addPointToList(point);
+      updateHudStatus();
     } else {
       triggerClosestHitbox();
     }
@@ -332,6 +342,7 @@ function updateGamepadState() {
 
   lastStart = startPressed;
   lastA = aPressed;
+  lastX = xPressed;
   lastLeftStickClick = leftStickClickPressed;
   lastRecenter = recenterPressed;
 }
@@ -549,13 +560,80 @@ function createHitboxFromForm(event) {
   state.points = [];
   refreshPointList();
   refreshPointMarkers();
+  updateHudStatus();
 
   return created;
+}
+
+function updateHudStatus() {
+  if (!hudLeftText || !hudRightText) return;
+
+  const pointCount = state.points.length;
+  const minPoints = 4;
+
+  if (!state.hudVisible) {
+    const base = [
+      '<div><span class="button-tag">Start</span> toggle HUD</div>',
+      '<div><span class="button-tag">A</span> open / place</div>',
+      '<div><span class="button-tag">X</span> recenter</div>',
+      '<div><span class="button-tag">L3/B10</span> hitbox mode</div>',
+    ].join('');
+    hudLeftText.innerHTML = base;
+    hudRightText.innerHTML = base;
+    return;
+  }
+
+  if (state.hitboxPlacementMode) {
+    const finishText = pointCount >= minPoints ? '<span class="button-tag">X</span> finish item' : '<span class="button-tag">X</span> need ' + Math.max(0, minPoints - pointCount) + ' more';
+    const builder = [
+      '<div><span class="button-tag">Points</span> ' + pointCount + '</div>',
+      '<div>' + finishText + '</div>',
+      '<div><span class="button-tag">A</span> add point</div>',
+      '<div><span class="button-tag">Start</span> close HUD</div>',
+    ].join('');
+    hudLeftText.innerHTML = builder;
+    hudRightText.innerHTML = builder;
+    return;
+  }
+
+  const normal = [
+    '<div><span class="button-tag">Start</span> toggle HUD</div>',
+    '<div><span class="button-tag">A</span> open nearest</div>',
+    '<div><span class="button-tag">X</span> recenter</div>',
+    '<div><span class="button-tag">L3/B10</span> hitbox mode</div>',
+  ].join('');
+  hudLeftText.innerHTML = normal;
+  hudRightText.innerHTML = normal;
 }
 
 function setHudVisible(visible) {
   state.hudVisible = visible;
   hudPanels.forEach((panel) => panel.classList.toggle('hidden', !visible));
+  updateHudStatus();
+}
+
+function finishHitboxPlacement() {
+  if (state.points.length < 4) {
+    alert('Need at least 4 points to finish this hitbox/item.');
+    return;
+  }
+
+  const name = `Item ${state.hitboxes.length + 1}`;
+  const item = {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name,
+    points: [...state.points],
+    assetId: state.assets[0]?.id || null,
+  };
+
+  const created = createHitbox(item);
+  created.position.set(0, 0, 0);
+  state.hitboxes.push(item);
+  state.points = [];
+  refreshPointList();
+  refreshPointMarkers();
+  state.hitboxPlacementMode = false;
+  updateHudStatus();
 }
 
 function setVrMode(enabled) {
