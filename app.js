@@ -602,13 +602,19 @@ async function startXRSession(mode) {
 }
 
 function setUpInteractions() {
-  document.querySelector('#toggle-library').addEventListener('click', () => {
-    libraryPanel.classList.toggle('hidden');
-  });
+  const toggleLibraryButton = document.querySelector('#toggle-library');
+  if (toggleLibraryButton) {
+    toggleLibraryButton.addEventListener('click', () => {
+      libraryPanel.classList.toggle('hidden');
+    });
+  }
 
-  document.querySelector('#toggle-hitbox').addEventListener('click', () => {
-    hitboxPanel.classList.toggle('hidden');
-  });
+  const toggleHitboxButton = document.querySelector('#toggle-hitbox');
+  if (toggleHitboxButton) {
+    toggleHitboxButton.addEventListener('click', () => {
+      hitboxPanel.classList.toggle('hidden');
+    });
+  }
 
   document.querySelectorAll('[data-xr-mode]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -625,9 +631,12 @@ function setUpInteractions() {
     });
   });
 
-  document.querySelector('#recenter-button').addEventListener('click', () => {
-    initialSensorQuaternion = headsetTilt ? headsetTilt.clone() : sensorQuaternion.clone();
-  });
+  const recenterButton = document.querySelector('#recenter-button');
+  if (recenterButton) {
+    recenterButton.addEventListener('click', () => {
+      initialSensorQuaternion = headsetTilt ? headsetTilt.clone() : sensorQuaternion.clone();
+    });
+  }
 
   document.querySelectorAll('.panel-close').forEach((button) => {
     button.addEventListener('click', () => {
@@ -637,21 +646,32 @@ function setUpInteractions() {
     });
   });
 
-  cameraPermission.addEventListener('click', () => setCameraMode('rear'));
+  if (cameraPermission) {
+    cameraPermission.addEventListener('click', () => setCameraMode('rear'));
+  }
   document.addEventListener('pointerdown', requestSensorPermission, { passive: true });
-  assetInput.addEventListener('change', handleAssetSelection);
-  hitboxForm.addEventListener('submit', createHitboxFromForm);
+  if (assetInput) {
+    assetInput.addEventListener('change', handleAssetSelection);
+  }
+  if (hitboxForm) {
+    hitboxForm.addEventListener('submit', createHitboxFromForm);
+  }
 
-  document.querySelector('#add-point').addEventListener('click', () => {
-    const gazePoint = getGazePoint();
-    const x = Number(gazePoint.x.toFixed(2));
-    const y = Number(gazePoint.y.toFixed(2));
-    const z = Number(gazePoint.z.toFixed(2));
+  const addPointButton = document.querySelector('#add-point');
+  if (addPointButton) {
+    addPointButton.addEventListener('click', () => {
+      const gazePoint = getGazePoint();
+      const x = Number(gazePoint.x.toFixed(2));
+      const y = Number(gazePoint.y.toFixed(2));
+      const z = Number(gazePoint.z.toFixed(2));
 
-    addPointToList([x, y, z]);
-  });
+      addPointToList([x, y, z]);
+    });
+  }
 
-  mediaOverlay.querySelector('.panel-close').addEventListener('click', closeMediaViewer);
+  if (mediaOverlay && mediaOverlay.querySelector('.panel-close')) {
+    mediaOverlay.querySelector('.panel-close').addEventListener('click', closeMediaViewer);
+  }
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeMediaViewer();
   });
