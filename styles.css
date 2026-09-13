@@ -1,16 +1,17 @@
 :root {
-  --bg: #0d0b09;
-  --bg-strong: #171512;
-  --panel: rgba(18, 15, 12, 0.8);
-  --panel-strong: rgba(28, 24, 20, 0.9);
-  --line: rgba(227, 215, 198, 0.14);
-  --cyan: #f2e4d1;
-  --purple: #d6b9a1;
-  --mint: #e7d5bf;
-  --ink: #f9f4ee;
-  --muted: #d9c7b3;
-  --danger: #efb19d;
-  --shadow: 0 25px 48px rgba(0, 0, 0, 0.42);
+  --bg: #050505;
+  --bg-strong: #111111;
+  --panel: rgba(18, 18, 18, 0.78);
+  --panel-strong: rgba(26, 26, 26, 0.9);
+  --line: rgba(255, 255, 255, 0.12);
+  --cyan: #f3f3f3;
+  --purple: #cfcfcf;
+  --mint: #dfe3e3;
+  --ink: #f5f5f5;
+  --muted: #c3c3c3;
+  --danger: #ff5f57;
+  --good: #52d98a;
+  --shadow: 0 25px 48px rgba(0, 0, 0, 0.5);
 }
 
 * { box-sizing: border-box; }
@@ -20,7 +21,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: radial-gradient(circle at top, #1b1715 0%, var(--bg) 45%, #080807 100%);
+  background: radial-gradient(circle at top, #171717 0%, var(--bg) 50%, #000 100%);
   color: var(--ink);
   font-family: 'Segoe UI', sans-serif;
 }
@@ -51,23 +52,9 @@ body.xr-session {
   background: #030a10;
 }
 
-#space::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at 50% 30%, rgba(255, 234, 205, 0.06), transparent 42%);
-  pointer-events: none;
-  z-index: 0;
-}
-
+#space::before,
 #space::after {
-  content: "";
-  position: fixed;
-  inset: 2.5%;
-  border: 1px solid rgba(245, 234, 220, 0.08);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
+  display: none !important;
 }
 
 #camera,
@@ -77,7 +64,10 @@ body.xr-session {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: transparent;
+  background: #000;
+  display: block;
+  opacity: 1;
+  z-index: 0;
   filter: none;
   -webkit-filter: none;
   mix-blend-mode: normal;
@@ -90,7 +80,7 @@ body.xr-session {
 #shade {
   position: fixed;
   inset: 0;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.06);
   pointer-events: none;
   z-index: 1;
 }
@@ -169,11 +159,11 @@ body.vr-mode .vr-reticle {
   z-index: 35;
   width: min(400px, 30vw);
   padding: 0.7rem 0.85rem 0.8rem;
-  border-radius: 16px;
-  background: rgba(18, 15, 12, 0.76);
-  border: 1px solid rgba(240, 225, 205, 0.2);
-  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3), inset 0 0 18px rgba(247, 231, 214, 0.03);
-  backdrop-filter: blur(14px);
+  border-radius: 14px;
+  background: rgba(16, 16, 16, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 18px 26px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
 }
 
 .hud-eye-right {
@@ -215,11 +205,23 @@ body.vr-mode .vr-reticle {
   min-width: 2.1rem;
   padding: 0.18rem 0.5rem;
   border-radius: 999px;
-  background: rgba(255, 244, 231, 0.06);
-  border: 1px solid rgba(245, 233, 217, 0.22);
-  color: var(--cyan);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--ink);
   font-weight: 800;
-  box-shadow: inset 0 0 10px rgba(244, 223, 196, 0.06);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.03);
+}
+
+.button-tag.good {
+  background: rgba(82, 217, 138, 0.12);
+  border-color: rgba(82, 217, 138, 0.42);
+  color: var(--good);
+}
+
+.button-tag.bad {
+  background: rgba(255, 95, 87, 0.12);
+  border-color: rgba(255, 95, 87, 0.42);
+  color: var(--danger);
 }
 
 .panel-kicker {
@@ -450,16 +452,19 @@ body.vr-mode .vr-reticle {
 body.vr-mode #camera {
   width: 50%;
   left: 0;
+  z-index: 0;
 }
 
 body.vr-mode #vr-camera {
   display: block;
   width: 50%;
   left: 50%;
+  z-index: 0;
 }
 
 body.vr-mode #shade {
   width: 50%;
+  background: rgba(0, 0, 0, 0.08);
 }
 
 body.vr-mode .css-world {

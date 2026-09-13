@@ -94,7 +94,7 @@ function refreshPointMarkers() {
   state.points.forEach(([x, y, z]) => {
     const marker = new THREE.Mesh(
       new THREE.SphereGeometry(0.05, 12, 12),
-      new THREE.MeshBasicMaterial({ color: '#86f7c8', transparent: true, opacity: 0.9 }),
+      new THREE.MeshBasicMaterial({ color: '#52d98a', transparent: true, opacity: 0.9 }),
     );
     marker.position.set(x, y, z);
     pointAnchorGroup.add(marker);
@@ -445,7 +445,7 @@ function refreshPointList() {
 function createHitbox(item) {
   const points = item.points.map(([x, y, z]) => new THREE.Vector3(x, y, z));
   const geometry = new THREE.BufferGeometry().setFromPoints([...points, points[0]]);
-  const material = new THREE.LineBasicMaterial({ color: '#7ef3ff', transparent: true, opacity: 0.9 });
+  const material = new THREE.LineBasicMaterial({ color: '#f5f5f5', transparent: true, opacity: 0.9 });
   const line = new THREE.LineLoop(geometry, material);
 
   const center = points.reduce((sum, point) => sum.add(point), new THREE.Vector3()).divideScalar(points.length);
