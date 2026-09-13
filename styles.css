@@ -21,7 +21,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: radial-gradient(circle at top, #171717 0%, var(--bg) 50%, #000 100%);
+  background: #000;
   color: var(--ink);
   font-family: 'Segoe UI', sans-serif;
 }
@@ -64,13 +64,14 @@ body.xr-session {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #000;
+  background: transparent;
   display: block;
   opacity: 1;
-  z-index: 0;
-  filter: none;
-  -webkit-filter: none;
-  mix-blend-mode: normal;
+  z-index: -2;
+  filter: none !important;
+  -webkit-filter: none !important;
+  mix-blend-mode: normal !important;
+  pointer-events: none;
 }
 
 #camera.front-camera { transform: scaleX(-1); }
@@ -80,7 +81,7 @@ body.xr-session {
 #shade {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.06);
+  background: transparent;
   pointer-events: none;
   z-index: 1;
 }
@@ -90,6 +91,7 @@ body.xr-session {
   inset: 0;
   z-index: 2;
   pointer-events: auto;
+  background: transparent;
 }
 
 .css-world {

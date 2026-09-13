@@ -102,8 +102,8 @@ function refreshPointMarkers() {
 }
 
 function buildImmersiveEnvironment() {
-  scene.background = new THREE.Color(0x090909);
-  scene.fog = new THREE.Fog(0x090909, 7, 18);
+  scene.background = null;
+  scene.fog = new THREE.Fog(0x000000, 7, 18);
 
   const ambient = new THREE.AmbientLight(0xf1e2cf, 0.4);
   scene.add(ambient);
@@ -220,6 +220,7 @@ function setupScene() {
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
   renderer.xr.enabled = true;
+  renderer.setClearColor(0x000000, 0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
   spaceEl.appendChild(renderer.domElement);
@@ -317,6 +318,8 @@ async function setCameraMode(mode) {
     cameraMode = mode;
     cameraEl.classList.toggle('front-camera', mode === 'front');
     vrCameraEl.classList.toggle('front-camera', mode === 'front');
+    cameraEl.play().catch(() => {});
+    vrCameraEl.play().catch(() => {});
     cameraPermission.hidden = true;
   } catch (error) {
     cameraPermission.hidden = false;
@@ -846,11 +849,14 @@ setUpInteractions();
 requestSensorPermission();
 setHudVisible(true);
 setVrMode(true);
-setCameraMode('rear');
 renderAssetList();
 
-if (navigator.mediaDevices?.getUserMedia) {
+const startCamera = () => {
+  if (!navigator.mediaDevices?.getUserMedia) return;
   setCameraMode('rear').catch(() => {
-    cameraPermission.hidden = false;
+    if (cameraPermission) cameraPermission.hidden = false;
   });
-}
+};
+
+window.addEventListener('load', startCamera, { once: true });
+startCamera();
