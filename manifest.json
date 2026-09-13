@@ -1,7 +1,7 @@
 {
-  "name": "My 3D World",
-  "short_name": "3D World",
-  "description": "A personal 3D room controlled by your phone.",
+  "name": "3D Room",
+  "short_name": "3D",
+  "description": "A personal 3D room controlled by your controller.",
   "start_url": ".",
   "display": "fullscreen",
   "orientation": "landscape",
