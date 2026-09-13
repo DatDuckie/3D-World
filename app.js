@@ -20,6 +20,7 @@ const mediaAudio = document.querySelector('#media-audio');
 const mediaTitle = document.querySelector('#media-title');
 const vrReticleLeft = document.querySelector('#vr-reticle-left');
 const vrReticleRight = document.querySelector('#vr-reticle-right');
+const hudPanels = [document.querySelector('#hud-left'), document.querySelector('#hud-right')].filter(Boolean);
 
 const supportsWebXR = 'xr' in navigator;
 let scene;
@@ -53,6 +54,7 @@ const state = {
   selectedAssetId: null,
   stereoEnabled: true,
   hudVisible: false,
+  hitboxPlacementMode: false,
 }
 
 const stereoEyeOffset = 0.065;
@@ -298,10 +300,15 @@ function updateGamepadState() {
   const leftStickY = pad.axes[1] ?? 0;
   const startPressed = Boolean(pad.buttons[9]?.pressed || pad.buttons[8]?.pressed || pad.buttons[16]?.pressed);
   const aPressed = Boolean(pad.buttons[0]?.pressed || pad.buttons[1]?.pressed || pad.buttons[7]?.pressed);
+  const leftStickClickPressed = Boolean(pad.buttons[10]?.pressed || pad.buttons[11]?.pressed);
   const recenterPressed = Boolean(pad.buttons[3]?.pressed || pad.buttons[2]?.pressed || pad.buttons[16]?.pressed || pad.buttons[10]?.pressed);
 
   if (startPressed && !lastStart) {
     setHudVisible(!state.hudVisible);
+  }
+
+  if (leftStickClickPressed && !lastLeftStickClick) {
+    state.hitboxPlacementMode = !state.hitboxPlacementMode;
   }
 
   if (state.hudVisible) {
@@ -314,11 +321,18 @@ function updateGamepadState() {
   }
 
   if (aPressed && !lastA) {
-    triggerClosestHitbox();
+    if (state.hitboxPlacementMode) {
+      const gazePoint = getGazePoint();
+      const point = [Number(gazePoint.x.toFixed(2)), Number(gazePoint.y.toFixed(2)), Number(gazePoint.z.toFixed(2))];
+      addPointToList(point);
+    } else {
+      triggerClosestHitbox();
+    }
   }
 
   lastStart = startPressed;
   lastA = aPressed;
+  lastLeftStickClick = leftStickClickPressed;
   lastRecenter = recenterPressed;
 }
 
@@ -541,8 +555,7 @@ function createHitboxFromForm(event) {
 
 function setHudVisible(visible) {
   state.hudVisible = visible;
-  if (!hudPanel) return;
-  hudPanel.classList.toggle('hidden', !visible);
+  hudPanels.forEach((panel) => panel.classList.toggle('hidden', !visible));
 }
 
 function setVrMode(enabled) {
