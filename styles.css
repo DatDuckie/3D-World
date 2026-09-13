@@ -37,11 +37,14 @@ button {
   cursor: pointer;
 }
 
-body.xr-session #xr-menu,
 body.xr-session .side-panel,
 body.xr-session .media-overlay,
 body.xr-session .permission-button {
   opacity: 0.2;
+}
+
+body.xr-session #xr-menu {
+  opacity: 1;
 }
 
 body.xr-session {
@@ -92,8 +95,8 @@ body.xr-session {
   position: fixed;
   top: 50%;
   left: 25%;
-  width: 8px;
-  height: 8px;
+  width: 2px;
+  height: 2px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.75);

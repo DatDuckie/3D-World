@@ -82,6 +82,32 @@ function setupScene() {
   camera = new THREE.PerspectiveCamera(76, innerWidth / innerHeight, 0.1, 100);
   camera.userData.targetQuaternion = new THREE.Quaternion();
 
+  const floor = new THREE.Mesh(
+    new THREE.CircleGeometry(8, 64),
+    new THREE.MeshStandardMaterial({ color: '#0a1d2d', emissive: '#081926', roughness: 0.95, metalness: 0.1 }),
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -1.1;
+  scene.add(floor);
+
+  const grid = new THREE.GridHelper(18, 18, 0x7ef3ff, 0x1d3141);
+  grid.position.y = -1.08;
+  grid.material.opacity = 0.6;
+  grid.material.transparent = true;
+  scene.add(grid);
+
+  const orb = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.32, 0),
+    new THREE.MeshStandardMaterial({ color: '#9a8bff', emissive: '#6a5fe2', emissiveIntensity: 0.75 }),
+  );
+  orb.position.set(0, 0.5, -3);
+  scene.add(orb);
+
+  const ambient = new THREE.HemisphereLight(0x9ad8ff, 0x071218, 1.2);
+  const key = new THREE.PointLight(0x7ef3ff, 2.2, 14, 2);
+  key.position.set(0, 2.4, 3);
+  scene.add(ambient, key);
+
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
   renderer.xr.enabled = true;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
