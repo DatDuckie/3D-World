@@ -102,21 +102,51 @@ function refreshPointMarkers() {
 }
 
 function buildImmersiveEnvironment() {
+  scene.background = new THREE.Color(0x090909);
+  scene.fog = new THREE.Fog(0x090909, 7, 18);
+
+  const ambient = new THREE.AmbientLight(0xf1e2cf, 0.4);
+  scene.add(ambient);
+
+  const keyLight = new THREE.DirectionalLight(0xf5dcc0, 1.1);
+  keyLight.position.set(1.5, 3.2, 2.6);
+  scene.add(keyLight);
+
+  const fillLight = new THREE.PointLight(0xd4b896, 0.7, 18, 2);
+  fillLight.position.set(-2.8, 1.8, -2.4);
+  scene.add(fillLight);
+
   const backgroundGlow = new THREE.Mesh(
-    new THREE.SphereGeometry(18, 32, 32),
-    new THREE.MeshBasicMaterial({ color: 0x171511, side: THREE.BackSide, transparent: true, opacity: 0.9 }),
+    new THREE.SphereGeometry(18, 28, 28),
+    new THREE.MeshBasicMaterial({ color: 0x1b1917, side: THREE.BackSide, transparent: true, opacity: 0.9 }),
   );
   scene.add(backgroundGlow);
 
   const ring = new THREE.Mesh(
-    new THREE.RingGeometry(2.6, 2.9, 96),
-    new THREE.MeshBasicMaterial({ color: 0xf4e9d8, transparent: true, opacity: 0.85, side: THREE.DoubleSide }),
+    new THREE.RingGeometry(2.4, 2.86, 96),
+    new THREE.MeshBasicMaterial({ color: 0xf7eee7, transparent: true, opacity: 0.7, side: THREE.DoubleSide }),
   );
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = -1.08;
   scene.add(ring);
 
-  scene.userData.worldEffects = { backgroundGlow, ring };
+  const innerGlow = new THREE.Mesh(
+    new THREE.RingGeometry(1.0, 2.18, 96),
+    new THREE.MeshBasicMaterial({ color: 0x8b7562, transparent: true, opacity: 0.22, side: THREE.DoubleSide }),
+  );
+  innerGlow.rotation.x = -Math.PI / 2;
+  innerGlow.position.y = -1.07;
+  scene.add(innerGlow);
+
+  const horizon = new THREE.Mesh(
+    new THREE.TorusGeometry(3.4, 0.03, 20, 120),
+    new THREE.MeshBasicMaterial({ color: 0xe7d7c1, transparent: true, opacity: 0.22 }),
+  );
+  horizon.rotation.x = Math.PI / 2;
+  horizon.position.set(0, -0.96, 0);
+  scene.add(horizon);
+
+  scene.userData.worldEffects = { backgroundGlow, ring, innerGlow, horizon, keyLight, fillLight };
 }
 
 function renderFrame() {
@@ -128,7 +158,11 @@ function renderFrame() {
     const t = performance.now() * 0.0006;
     worldEffects.ring.rotation.z = t * 1.1;
     worldEffects.ring.scale.setScalar(1 + Math.sin(t * 1.8) * 0.04);
-    worldEffects.backgroundGlow.rotation.y = t * 0.28;
+    worldEffects.innerGlow.rotation.z = -t * 0.8;
+    worldEffects.horizon.rotation.z = t * 0.7;
+    worldEffects.backgroundGlow.rotation.y = t * 0.18;
+    worldEffects.keyLight.position.x = 1.4 + Math.sin(t * 2) * 0.4;
+    worldEffects.fillLight.intensity = 0.62 + Math.sin(t * 1.7) * 0.08;
   }
 
   if (state.stereoEnabled && !renderer.xr.isPresenting) {
@@ -331,9 +365,9 @@ function updateGamepadState() {
   const leftStickY = pad.axes[1] ?? 0;
   const startPressed = Boolean(pad.buttons[9]?.pressed || pad.buttons[8]?.pressed || pad.buttons[16]?.pressed);
   const aPressed = Boolean(pad.buttons[0]?.pressed || pad.buttons[1]?.pressed || pad.buttons[7]?.pressed);
-  const xPressed = Boolean(pad.buttons[2]?.pressed || pad.buttons[3]?.pressed);
+  const xPressed = Boolean(pad.buttons[2]?.pressed);
+  const recenterPressed = Boolean(pad.buttons[3]?.pressed);
   const leftStickClickPressed = Boolean(pad.buttons[10]?.pressed || pad.buttons[11]?.pressed);
-  const recenterPressed = Boolean(pad.buttons[3]?.pressed || pad.buttons[2]?.pressed || pad.buttons[16]?.pressed || pad.buttons[10]?.pressed);
 
   if (startPressed && !lastStart) {
     setHudVisible(!state.hudVisible);
@@ -603,7 +637,7 @@ function updateHudStatus() {
     const base = [
       '<div><span class="button-tag">Start</span> toggle HUD</div>',
       '<div><span class="button-tag">A</span> open / place</div>',
-      '<div><span class="button-tag">X</span> recenter</div>',
+      '<div><span class="button-tag">Y</span> recenter</div>',
       '<div><span class="button-tag">L3/B10</span> hitbox mode</div>',
     ].join('');
     hudLeftText.innerHTML = base;
@@ -631,7 +665,7 @@ function updateHudStatus() {
     '<div><span class="button-tag">Mode</span> explore</div>',
     '<div><span class="button-tag">Start</span> HUD</div>',
     '<div><span class="button-tag">A</span> open nearest</div>',
-    '<div><span class="button-tag">X</span> recenter</div>',
+    '<div><span class="button-tag">Y</span> recenter</div>',
     '<div><span class="button-tag">L3/B10</span> place</div>',
   ].join('');
   hudLeftText.innerHTML = normal;
