@@ -103,41 +103,20 @@ function refreshPointMarkers() {
 
 function buildImmersiveEnvironment() {
   const backgroundGlow = new THREE.Mesh(
-    new THREE.SphereGeometry(16, 32, 32),
-    new THREE.MeshBasicMaterial({ color: 0x0b2032, side: THREE.BackSide, transparent: true, opacity: 0.88 }),
+    new THREE.SphereGeometry(18, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0x171511, side: THREE.BackSide, transparent: true, opacity: 0.9 }),
   );
   scene.add(backgroundGlow);
 
-  const floor = new THREE.GridHelper(30, 30, 0x7ef3ff, 0x204b63);
-  floor.position.y = -1.15;
-  floor.material.transparent = true;
-  floor.material.opacity = 0.36;
-  scene.add(floor);
-
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(2.8, 0.025, 18, 96),
-    new THREE.MeshBasicMaterial({ color: 0x8ae9ff, transparent: true, opacity: 0.8 }),
+    new THREE.RingGeometry(2.6, 2.9, 96),
+    new THREE.MeshBasicMaterial({ color: 0xf4e9d8, transparent: true, opacity: 0.85, side: THREE.DoubleSide }),
   );
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = -1.08;
   scene.add(ring);
 
-  const starPositions = [];
-  for (let i = 0; i < 700; i += 1) {
-    starPositions.push(
-      (Math.random() - 0.5) * 18,
-      Math.random() * 10 + 1,
-      (Math.random() - 0.5) * 18,
-    );
-  }
-
-  const starField = new THREE.Points(
-    new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3)),
-    new THREE.PointsMaterial({ color: 0xbfefff, size: 0.04, transparent: true, opacity: 0.85 }),
-  );
-  scene.add(starField);
-
-  scene.userData.worldEffects = { backgroundGlow, floor, ring, starField };
+  scene.userData.worldEffects = { backgroundGlow, ring };
 }
 
 function renderFrame() {
@@ -147,10 +126,9 @@ function renderFrame() {
   const worldEffects = scene?.userData?.worldEffects;
   if (worldEffects) {
     const t = performance.now() * 0.0006;
-    worldEffects.ring.rotation.z = t * 1.2;
-    worldEffects.ring.scale.setScalar(1 + Math.sin(t * 2.2) * 0.08);
-    worldEffects.starField.rotation.y += 0.0008;
-    worldEffects.backgroundGlow.rotation.y = t * 0.4;
+    worldEffects.ring.rotation.z = t * 1.1;
+    worldEffects.ring.scale.setScalar(1 + Math.sin(t * 1.8) * 0.04);
+    worldEffects.backgroundGlow.rotation.y = t * 0.28;
   }
 
   if (state.stereoEnabled && !renderer.xr.isPresenting) {
@@ -158,26 +136,27 @@ function renderFrame() {
     const height = renderer.domElement.clientHeight || innerHeight;
     const halfWidth = Math.max(1, width / 2);
 
-    const originalProjection = camera.projectionMatrix.clone();
+    leftCamera.position.copy(camera.position);
+    rightCamera.position.copy(camera.position);
+    leftCamera.quaternion.copy(camera.quaternion);
+    rightCamera.quaternion.copy(camera.quaternion);
+    leftCamera.position.x = -stereoEyeOffset;
+    rightCamera.position.x = stereoEyeOffset;
 
-    camera.setViewOffset(width, height, 0, 0, halfWidth, height);
-    camera.position.x = -stereoEyeOffset;
-    camera.updateProjectionMatrix();
+    leftCamera.updateMatrixWorld();
+    rightCamera.updateMatrixWorld();
+
     renderer.setScissorTest(true);
     renderer.setViewport(0, 0, halfWidth, height);
     renderer.setScissor(0, 0, halfWidth, height);
-    renderer.render(scene, camera);
+    leftCamera.updateProjectionMatrix();
+    renderer.render(scene, leftCamera);
 
-    camera.clearViewOffset();
-    camera.position.x = stereoEyeOffset;
-    camera.updateProjectionMatrix();
     renderer.setViewport(halfWidth, 0, halfWidth, height);
     renderer.setScissor(halfWidth, 0, halfWidth, height);
-    renderer.render(scene, camera);
+    rightCamera.updateProjectionMatrix();
+    renderer.render(scene, rightCamera);
 
-    camera.position.x = 0;
-    camera.projectionMatrix.copy(originalProjection);
-    camera.updateProjectionMatrix();
     renderer.setScissorTest(false);
   } else {
     renderer.render(scene, camera);
