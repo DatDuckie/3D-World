@@ -27,6 +27,8 @@ let leftCamera;
 let rightCamera;
 let renderer;
 let cssRenderer;
+let menuAnchor;
+let mediaAnchor;
 let sensorListening = false;
 let cameraMode = 'rear';
 let initialSensorQuaternion = null;
@@ -134,25 +136,58 @@ function setupScene() {
   cssRenderer.domElement.className = 'css-world';
   spaceEl.appendChild(cssRenderer.domElement);
 
+  const menuEl = document.querySelector('#xr-menu');
+  const mediaEl = document.querySelector('#media-overlay');
+
+  if (menuEl) {
+    menuEl.style.pointerEvents = 'auto';
+    menuAnchor = createCssAnchor(menuEl, new THREE.Vector3(0, 0.4, -2.6));
+  }
+
+  if (mediaEl) {
+    mediaEl.style.pointerEvents = 'auto';
+    mediaAnchor = createCssAnchor(mediaEl, new THREE.Vector3(0, 0.25, -2.6));
+  }
+
   animate();
 }
 
 function updateMenuTransform() {
-  const menu = document.querySelector('#xr-menu');
-  if (!menu) return;
-  const x = innerWidth * 0.5 + state.menuOffset.x * (innerWidth * 0.2);
-  const y = innerHeight * 0.52 + state.menuOffset.y * (innerHeight * 0.16);
-  menu.style.left = `${x}px`;
-  menu.style.top = `${y}px`;
-  menu.style.transform = 'translate(-50%, -50%)';
+  if (!menuAnchor) return;
+  const direction = new THREE.Vector3();
+  const right = new THREE.Vector3();
+  const up = new THREE.Vector3();
+  camera.getWorldDirection(direction);
+  right.setFromMatrixColumn(camera.matrixWorld, 0).normalize();
+  up.setFromMatrixColumn(camera.matrixWorld, 1).normalize();
+
+  const position = camera.position
+    .clone()
+    .add(direction.clone().multiplyScalar(2.9))
+    .add(right.clone().multiplyScalar(state.menuOffset.x * 0.8 + 0.9))
+    .add(up.clone().multiplyScalar(state.menuOffset.y * 0.8 + 0.35));
+
+  menuAnchor.position.copy(position);
+  menuAnchor.lookAt(camera.position);
 }
 
 function updateMediaTransform() {
-  const panel = document.querySelector('#media-overlay');
-  if (!panel) return;
-  panel.style.left = '50%';
-  panel.style.top = '50%';
-  panel.style.transform = 'translate(-50%, -50%)';
+  if (!mediaAnchor) return;
+  const direction = new THREE.Vector3();
+  const right = new THREE.Vector3();
+  const up = new THREE.Vector3();
+  camera.getWorldDirection(direction);
+  right.setFromMatrixColumn(camera.matrixWorld, 0).normalize();
+  up.setFromMatrixColumn(camera.matrixWorld, 1).normalize();
+
+  const position = camera.position
+    .clone()
+    .add(direction.clone().multiplyScalar(3.1))
+    .add(right.clone().multiplyScalar(0.15))
+    .add(up.clone().multiplyScalar(0.2));
+
+  mediaAnchor.position.copy(position);
+  mediaAnchor.lookAt(camera.position);
 }
 
 function animate() {
