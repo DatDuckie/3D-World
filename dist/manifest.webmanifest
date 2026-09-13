@@ -1,0 +1,15 @@
+{
+  "name": "Roomscape",
+  "short_name": "Roomscape",
+  "description": "Map rooms, place interactive anchors, and open local media in spatial view.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0e1512",
+  "theme_color": "#101814",
+  "categories": ["entertainment", "productivity", "utilities"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

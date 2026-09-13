@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#06131d" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="styles.css?v=21" />
+    <script type="importmap">
+      { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js" } }
+    </script>
+    <title>XR World Studio</title>
+  </head>
+  <body>
+    <video id="camera" autoplay playsinline muted aria-label="Camera passthrough"></video>
+    <video id="vr-camera" autoplay playsinline muted aria-hidden="true"></video>
+    <div id="shade"></div>
+    <div id="space" aria-hidden="true"></div>
+
+    <button id="camera-permission" class="permission-button" type="button" hidden>Enable camera</button>
+
+    <aside id="xr-menu" class="floating-panel menu-panel" aria-label="XR menu">
+      <span class="panel-kicker">XR</span>
+      <h1>World</h1>
+      <div class="menu-actions">
+        <button type="button" id="toggle-library">Library</button>
+        <button type="button" id="toggle-hitbox">Hitbox</button>
+        <button type="button" data-xr-mode="ar">AR</button>
+        <button type="button" data-xr-mode="vr">VR</button>
+        <button type="button" id="recenter-button">Recenter</button>
+      </div>
+    </aside>
+
+    <section id="library-panel" class="floating-panel side-panel hidden" aria-label="Media library panel">
+      <div class="panel-header">
+        <span>Files</span>
+        <button type="button" class="panel-close" data-panel="library-panel">×</button>
+      </div>
+      <label class="upload-button" for="asset-input">Add folder of media</label>
+      <input id="asset-input" type="file" accept="image/*,video/*,audio/*" multiple webkitdirectory directory />
+      <div id="asset-list" class="asset-list" aria-live="polite"></div>
+    </section>
+
+    <section id="hitbox-panel" class="floating-panel side-panel hidden" aria-label="Hitbox panel">
+      <div class="panel-header">
+        <span>Hitbox editor</span>
+        <button type="button" class="panel-close" data-panel="hitbox-panel">×</button>
+      </div>
+      <form id="hitbox-form" class="hitbox-form">
+        <label>
+          Item name
+          <input id="hitbox-name" type="text" maxlength="40" placeholder="Book, wall, poster..." required />
+        </label>
+
+        <div class="point-row">
+          <input id="point-x" type="number" step="0.1" value="-1" placeholder="X" />
+          <input id="point-y" type="number" step="0.1" value="0" placeholder="Y" />
+          <input id="point-z" type="number" step="0.1" value="-1" placeholder="Z" />
+          <button type="button" id="add-point" class="secondary-button">Add point</button>
+        </div>
+
+        <div id="point-list" class="point-list" aria-live="polite"></div>
+        <button type="submit" class="primary-button">Create hitbox</button>
+      </form>
+    </section>
+
+    <section id="media-overlay" class="floating-panel media-overlay hidden" aria-label="Media viewer">
+      <div class="panel-header">
+        <span id="media-title">File</span>
+        <button type="button" class="panel-close" data-panel="media-overlay">×</button>
+      </div>
+      <img id="media-image" alt="Selected media" />
+      <video id="media-video" controls playsinline></video>
+      <audio id="media-audio" controls></audio>
+    </section>
+
+    <script type="module" src="app.js?v=21"></script>
+  </body>
+</html>

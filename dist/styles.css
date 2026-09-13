@@ -1,0 +1,366 @@
+:root {
+  --bg: #06131d;
+  --bg-strong: #0d1f2c;
+  --panel: rgba(15, 31, 41, 0.8);
+  --panel-strong: rgba(22, 42, 56, 0.9);
+  --line: rgba(164, 226, 255, 0.18);
+  --cyan: #7ef3ff;
+  --purple: #9a8bff;
+  --mint: #86f7c8;
+  --ink: #ebf7ff;
+  --muted: #b4d7eb;
+  --danger: #ff9d9d;
+  --shadow: 0 25px 48px rgba(0, 0, 0, 0.38);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #0d2436 0%, var(--bg) 46%, #040c13 100%);
+  color: var(--ink);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  position: relative;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+#camera,
+#vr-camera {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: radial-gradient(circle at 50% 20%, rgba(76, 114, 145, 0.7), var(--bg) 70%);
+}
+
+#camera.front-camera { transform: scaleX(-1); }
+#vr-camera { display: none; }
+#vr-camera.front-camera { transform: scaleX(-1); }
+
+#shade {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 10, 16, 0.18);
+  pointer-events: none;
+  z-index: 1;
+}
+
+#space {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.css-world {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.css-world > * {
+  pointer-events: auto;
+}
+
+.permission-button {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 30;
+  border: 1px solid var(--cyan);
+  border-radius: 999px;
+  background: rgba(4, 16, 22, 0.85);
+  color: var(--cyan);
+  padding: 0.9rem 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.floating-panel {
+  position: absolute;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(12, 26, 35, 0.72);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.menu-panel {
+  z-index: 15;
+  width: min(290px, 76vw);
+  padding: 1rem 1rem 1.1rem;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(12, 18, 23, 0.72);
+}
+
+.panel-kicker {
+  display: inline-block;
+  margin-bottom: 0.3rem;
+  color: var(--mint);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.62rem;
+}
+
+.menu-panel h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  letter-spacing: -0.06em;
+}
+
+.menu-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.menu-actions button,
+.primary-button,
+.secondary-button,
+.upload-button,
+.panel-close,
+.asset-item,
+.point-pill {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+}
+
+.menu-actions button,
+.primary-button,
+.secondary-button,
+.upload-button {
+  min-height: 44px;
+  padding: 0.72rem 0.8rem;
+}
+
+.menu-actions button:hover,
+.primary-button:hover,
+.secondary-button:hover,
+.upload-button:hover,
+.asset-item:hover,
+.point-pill:hover,
+.panel-close:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 1px rgba(126, 243, 255, 0.28);
+}
+
+.primary-button {
+  background: linear-gradient(135deg, rgba(126, 243, 255, 0.25), rgba(154, 139, 255, 0.28));
+  color: var(--ink);
+}
+
+.secondary-button { background: rgba(255,255,255,0.04); }
+
+.side-panel {
+  z-index: 20;
+  width: min(360px, 82vw);
+  padding: 1rem;
+  left: 1.2rem;
+  top: 1.2rem;
+}
+
+.side-panel.hidden,
+.media-overlay.hidden {
+  display: none !important;
+}
+
+.side-panel.right {
+  left: auto;
+  right: 1.2rem;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+}
+
+.panel-close {
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+}
+
+.upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 0.8rem;
+  text-align: center;
+}
+
+#asset-input {
+  display: none;
+}
+
+.asset-list,
+.point-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.7rem;
+}
+
+.asset-item {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.45rem;
+  text-align: left;
+}
+
+.asset-item img,
+.asset-item video {
+  width: 68px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+}
+
+.asset-item .asset-copy {
+  min-width: 0;
+}
+
+.asset-item strong,
+.point-pill strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asset-item span,
+.point-pill span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.hitbox-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.hitbox-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.hitbox-form input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  background: rgba(8, 14, 19, 0.5);
+  color: var(--ink);
+}
+
+.point-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 0.5rem;
+}
+
+.point-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.48rem 0.7rem;
+}
+
+.point-pill button {
+  border: 0;
+  background: transparent;
+  color: var(--danger);
+  font-size: 1rem;
+}
+
+.media-overlay {
+  z-index: 25;
+  width: min(720px, 84vw);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1rem;
+}
+
+.media-overlay img,
+.media-overlay video,
+.media-overlay audio {
+  display: block;
+  width: 100%;
+  max-height: 60vh;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.3);
+}
+
+.media-overlay img {
+  object-fit: contain;
+  min-height: 280px;
+}
+
+.media-overlay video,
+.media-overlay audio {
+  max-height: 52vh;
+}
+
+body.vr-mode #camera {
+  width: 50%;
+  left: 0;
+}
+
+body.vr-mode #vr-camera {
+  display: block;
+  width: 50%;
+  left: 50%;
+}
+
+body.vr-mode #shade {
+  width: 50%;
+}
+
+@media (max-width: 640px) {
+  .menu-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .point-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .point-row .secondary-button {
+    grid-column: 1 / -1;
+  }
+}

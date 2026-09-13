@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "description": "Files bundled with Roomscape and available to spatial objects.",
+  "files": [
+    { "id": "welcome-pdf", "name": "Welcome to Roomscape.pdf", "path": "/content/Welcome-to-Roomscape.pdf", "type": "application/pdf", "objectTypes": ["reading"] },
+    { "id": "interstellar-demo", "name": "Interstellar.mp4", "path": "/content/Interstellar.mp4", "type": "video/mp4", "objectTypes": ["media"] }
+  ]
+}
