@@ -124,7 +124,7 @@ function buildImmersiveEnvironment() {
 
   const ring = new THREE.Mesh(
     new THREE.RingGeometry(2.4, 2.86, 96),
-    new THREE.MeshBasicMaterial({ color: 0xf7eee7, transparent: true, opacity: 0.7, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ color: 0xb9dfe9, transparent: true, opacity: 0.75, side: THREE.DoubleSide }),
   );
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = -1.08;
@@ -132,7 +132,7 @@ function buildImmersiveEnvironment() {
 
   const innerGlow = new THREE.Mesh(
     new THREE.RingGeometry(1.0, 2.18, 96),
-    new THREE.MeshBasicMaterial({ color: 0x8b7562, transparent: true, opacity: 0.22, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ color: 0x8bb7c6, transparent: true, opacity: 0.22, side: THREE.DoubleSide }),
   );
   innerGlow.rotation.x = -Math.PI / 2;
   innerGlow.position.y = -1.07;
@@ -848,3 +848,9 @@ setHudVisible(true);
 setVrMode(true);
 setCameraMode('rear');
 renderAssetList();
+
+if (navigator.mediaDevices?.getUserMedia) {
+  setCameraMode('rear').catch(() => {
+    cameraPermission.hidden = false;
+  });
+}
