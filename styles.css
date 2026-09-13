@@ -77,14 +77,14 @@ body.xr-session {
   position: fixed;
   inset: 0;
   z-index: 2;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .css-world {
   position: fixed;
   inset: 0;
   z-index: 10;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .css-world > * {
@@ -127,7 +127,7 @@ body.vr-mode .vr-reticle {
 }
 
 .floating-panel {
-  position: absolute;
+  position: fixed;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: rgba(12, 26, 35, 0.72);
@@ -395,7 +395,7 @@ body.vr-mode .css-world {
 body.vr-mode .menu-panel,
 body.vr-mode .side-panel,
 body.vr-mode .media-overlay {
-  opacity: 0.95;
+  opacity: 1;
 }
 
 @media (max-width: 640px) {

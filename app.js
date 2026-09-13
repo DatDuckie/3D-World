@@ -23,10 +23,10 @@ const vrReticleRight = document.querySelector('#vr-reticle-right');
 const supportsWebXR = 'xr' in navigator;
 let scene;
 let camera;
+let leftCamera;
+let rightCamera;
 let renderer;
 let cssRenderer;
-let menuAnchor;
-let mediaAnchor;
 let sensorListening = false;
 let cameraMode = 'rear';
 let initialSensorQuaternion = null;
@@ -50,6 +50,8 @@ const state = {
   stereoEnabled: true,
 }
 
+const stereoEyeOffset = 0.065;
+
 const sensorEuler = new THREE.Euler();
 const sensorQuaternion = new THREE.Quaternion();
 const screenAxis = new THREE.Vector3(0, 0, 1);
@@ -59,51 +61,56 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function createCssAnchor(element, position, scale = 0.0065) {
-  const object = new CSS3DObject(element);
-  object.position.copy(position);
-  object.scale.setScalar(scale);
-  scene.add(object);
-  return object;
-}
-
 function renderFrame() {
   camera.quaternion.slerp(camera.userData.targetQuaternion, 0.12);
   camera.updateMatrixWorld();
+
+  if (state.stereoEnabled && !renderer.xr.isPresenting) {
+    const width = renderer.domElement.clientWidth || innerWidth;
+    const height = renderer.domElement.clientHeight || innerHeight;
+    const halfWidth = Math.max(1, width / 2);
+
+    const originalProjection = camera.projectionMatrix.clone();
+
+    camera.setViewOffset(width, height, 0, 0, halfWidth, height);
+    camera.position.x = -stereoEyeOffset;
+    camera.updateProjectionMatrix();
+    renderer.setScissorTest(true);
+    renderer.setViewport(0, 0, halfWidth, height);
+    renderer.setScissor(0, 0, halfWidth, height);
+    renderer.render(scene, camera);
+
+    camera.clearViewOffset();
+    camera.position.x = stereoEyeOffset;
+    camera.updateProjectionMatrix();
+    renderer.setViewport(halfWidth, 0, halfWidth, height);
+    renderer.setScissor(halfWidth, 0, halfWidth, height);
+    renderer.render(scene, camera);
+
+    camera.position.x = 0;
+    camera.projectionMatrix.copy(originalProjection);
+    camera.updateProjectionMatrix();
+    renderer.setScissorTest(false);
+  } else {
+    renderer.render(scene, camera);
+  }
+
   updateMenuTransform();
   updateMediaTransform();
   updateGamepadState();
-  renderer.render(scene, camera);
   cssRenderer.render(scene, camera);
 }
 
 function setupScene() {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(76, innerWidth / innerHeight, 0.1, 100);
+  camera.position.set(0, 1.6, 0);
   camera.userData.targetQuaternion = new THREE.Quaternion();
 
-  const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(8, 64),
-    new THREE.MeshStandardMaterial({ color: '#0a1d2d', emissive: '#081926', roughness: 0.95, metalness: 0.1 }),
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -1.1;
-  scene.add(floor);
+  leftCamera = camera.clone();
+  rightCamera = camera.clone();
 
-  const grid = new THREE.GridHelper(18, 18, 0x7ef3ff, 0x1d3141);
-  grid.position.y = -1.08;
-  grid.material.opacity = 0.6;
-  grid.material.transparent = true;
-  scene.add(grid);
-
-  const orb = new THREE.Mesh(
-    new THREE.OctahedronGeometry(0.32, 0),
-    new THREE.MeshStandardMaterial({ color: '#9a8bff', emissive: '#6a5fe2', emissiveIntensity: 0.75 }),
-  );
-  orb.position.set(0, 0.5, -3);
-  scene.add(orb);
-
-  const ambient = new THREE.HemisphereLight(0x9ad8ff, 0x071218, 1.2);
+  const ambient = new THREE.HemisphereLight(0x9ad8ff, 0x061922, 1.1);
   const key = new THREE.PointLight(0x7ef3ff, 2.2, 14, 2);
   key.position.set(0, 2.4, 3);
   scene.add(ambient, key);
@@ -119,53 +126,25 @@ function setupScene() {
   cssRenderer.domElement.className = 'css-world';
   spaceEl.appendChild(cssRenderer.domElement);
 
-  if (!menuAnchor) {
-    menuAnchor = createCssAnchor(document.querySelector('#xr-menu'), new THREE.Vector3(0, 0.4, -2.6));
-  }
-  if (!mediaAnchor) {
-    mediaAnchor = createCssAnchor(mediaOverlay, new THREE.Vector3(0, 0.25, -2.6));
-  }
-
   animate();
 }
 
 function updateMenuTransform() {
-  if (!menuAnchor) return;
-  const direction = new THREE.Vector3();
-  const right = new THREE.Vector3();
-  const up = new THREE.Vector3();
-  camera.getWorldDirection(direction);
-  right.setFromMatrixColumn(camera.matrixWorld, 0).normalize();
-  up.setFromMatrixColumn(camera.matrixWorld, 1).normalize();
-
-  const position = camera.position
-    .clone()
-    .add(direction.clone().multiplyScalar(2.6))
-    .add(right.clone().multiplyScalar(state.menuOffset.x))
-    .add(up.clone().multiplyScalar(state.menuOffset.y));
-
-  menuAnchor.position.copy(position);
-  menuAnchor.lookAt(camera.position);
+  const menu = document.querySelector('#xr-menu');
+  if (!menu) return;
+  const x = innerWidth * 0.5 + state.menuOffset.x * (innerWidth * 0.2);
+  const y = innerHeight * 0.52 + state.menuOffset.y * (innerHeight * 0.16);
+  menu.style.left = `${x}px`;
+  menu.style.top = `${y}px`;
+  menu.style.transform = 'translate(-50%, -50%)';
 }
 
 function updateMediaTransform() {
-  if (!mediaAnchor) return;
-
-  const direction = new THREE.Vector3();
-  const right = new THREE.Vector3();
-  const up = new THREE.Vector3();
-  camera.getWorldDirection(direction);
-  right.setFromMatrixColumn(camera.matrixWorld, 0).normalize();
-  up.setFromMatrixColumn(camera.matrixWorld, 1).normalize();
-
-  const position = camera.position
-    .clone()
-    .add(direction.clone().multiplyScalar(2.7))
-    .add(right.clone().multiplyScalar(0))
-    .add(up.clone().multiplyScalar(0.15));
-
-  mediaAnchor.position.copy(position);
-  mediaAnchor.lookAt(camera.position);
+  const panel = document.querySelector('#media-overlay');
+  if (!panel) return;
+  panel.style.left = '50%';
+  panel.style.top = '50%';
+  panel.style.transform = 'translate(-50%, -50%)';
 }
 
 function animate() {
@@ -304,21 +283,13 @@ function createHitbox(item) {
   const points = item.points.map(([x, y, z]) => new THREE.Vector3(x, y, z));
   const geometry = new THREE.BufferGeometry().setFromPoints([...points, points[0]]);
   const material = new THREE.LineBasicMaterial({ color: '#7ef3ff', transparent: true, opacity: 0.9 });
-  const line = new THREE.Line(geometry, material);
+  const line = new THREE.LineLoop(geometry, material);
 
-  const fill = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.4, 1.4),
-    new THREE.MeshBasicMaterial({ color: '#9a8bff', transparent: true, opacity: 0.12, side: THREE.DoubleSide }),
-  );
-
-  const bounds = new THREE.Vector3();
   const center = points.reduce((sum, point) => sum.add(point), new THREE.Vector3()).divideScalar(points.length);
-  fill.position.copy(center);
-  fill.lookAt(camera.position);
   line.position.set(0, 0, 0);
 
   const group = new THREE.Group();
-  group.add(line, fill);
+  group.add(line);
   group.userData.item = item;
   scene.add(group);
 
