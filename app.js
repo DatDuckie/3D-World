@@ -103,28 +103,28 @@ function refreshPointMarkers() {
 
 function buildImmersiveEnvironment() {
   scene.background = null;
-  scene.fog = new THREE.Fog(0x000000, 7, 18);
+  scene.fog = new THREE.Fog(0x000000, 8, 18);
 
-  const ambient = new THREE.AmbientLight(0xf1e2cf, 0.4);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.18);
   scene.add(ambient);
 
-  const keyLight = new THREE.DirectionalLight(0xf5dcc0, 1.1);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
   keyLight.position.set(1.5, 3.2, 2.6);
   scene.add(keyLight);
 
-  const fillLight = new THREE.PointLight(0xd4b896, 0.7, 18, 2);
+  const fillLight = new THREE.PointLight(0xdfe5ea, 0.25, 18, 2);
   fillLight.position.set(-2.8, 1.8, -2.4);
   scene.add(fillLight);
 
   const backgroundGlow = new THREE.Mesh(
     new THREE.SphereGeometry(18, 28, 28),
-    new THREE.MeshBasicMaterial({ color: 0x1b1917, side: THREE.BackSide, transparent: true, opacity: 0.9 }),
+    new THREE.MeshBasicMaterial({ color: 0x0b0b0c, side: THREE.BackSide, transparent: true, opacity: 0.55 }),
   );
   scene.add(backgroundGlow);
 
   const ring = new THREE.Mesh(
     new THREE.RingGeometry(2.4, 2.86, 96),
-    new THREE.MeshBasicMaterial({ color: 0xb9dfe9, transparent: true, opacity: 0.75, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ color: 0xcfe4ee, transparent: true, opacity: 0.38, side: THREE.DoubleSide }),
   );
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = -1.08;
@@ -132,7 +132,7 @@ function buildImmersiveEnvironment() {
 
   const innerGlow = new THREE.Mesh(
     new THREE.RingGeometry(1.0, 2.18, 96),
-    new THREE.MeshBasicMaterial({ color: 0x8bb7c6, transparent: true, opacity: 0.22, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ color: 0xc3d4de, transparent: true, opacity: 0.14, side: THREE.DoubleSide }),
   );
   innerGlow.rotation.x = -Math.PI / 2;
   innerGlow.position.y = -1.07;
@@ -140,7 +140,7 @@ function buildImmersiveEnvironment() {
 
   const horizon = new THREE.Mesh(
     new THREE.TorusGeometry(3.4, 0.03, 20, 120),
-    new THREE.MeshBasicMaterial({ color: 0xe7d7c1, transparent: true, opacity: 0.22 }),
+    new THREE.MeshBasicMaterial({ color: 0xe7edf0, transparent: true, opacity: 0.12 }),
   );
   horizon.rotation.x = Math.PI / 2;
   horizon.position.set(0, -0.96, 0);
@@ -209,8 +209,8 @@ function setupScene() {
   leftCamera = camera.clone();
   rightCamera = camera.clone();
 
-  const ambient = new THREE.HemisphereLight(0x9ad8ff, 0x061922, 1.1);
-  const key = new THREE.PointLight(0x7ef3ff, 2.2, 14, 2);
+  const ambient = new THREE.HemisphereLight(0xffffff, 0x0a0a0b, 0.5);
+  const key = new THREE.PointLight(0xf1f5f7, 0.9, 14, 2);
   key.position.set(0, 2.4, 3);
   scene.add(ambient, key);
 
