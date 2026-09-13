@@ -1,35 +1,42 @@
 # XR World Studio
 
-This app is designed for personal use in a full VR/XR workflow only. It defaults into stereo VR mode and keeps the HUD in the lower center of each eye view so it stays readable without blocking the main scene.
+This is a personal VR/XR workspace focused on one thing: staying fully inside the immersive scene. The app is intentionally VR-first, keeps the HUD low and readable, and treats the media library as a room of selectable objects rather than a desktop gallery.
 
-## Controller layout and behavior
+## What it does
 
-- Start button: press once to open the XR HUD, press again to close it.
-- A button: aim at a hitbox and press A to open the linked image, video, or audio file.
-- X button: recenter the world orientation.
-- B button: use B if your controller layout assigns a secondary action to a panel or viewer close event.
-- Left stick: while the HUD is visible, use the stick to nudge the HUD slightly around the lower-center area without blocking the main view.
-- Look around: use the headset or device orientation to inspect the room and aim at hitboxes.
+- loads a folder of images, videos, and audio files into a media library
+- lets you place hitboxes in the room using gaze-based points
+- creates a shape from at least 4 points, with the final point connecting back to the first
+- opens the linked media item when you aim at the hitbox and trigger it
+- keeps the interface minimal and in-view, with a low HUD designed for XR use
 
-## HUD text
+## Controller flow
 
-The HUD appears in the bottom middle of each mono eye view and tells you:
+- Start: toggle the HUD on/off
+- L3 / B10: toggle hitbox placement mode
+- A: while in placement mode, add a point at your current gaze; while in normal mode, open the nearest hitbox
+- X: finish the item once you have enough points, or recenter the world orientation depending on mode
+- Left stick: nudge the HUD position slightly while it is visible
 
-- Start = toggle HUD on/off
-- A = open nearest hitbox
-- X = recenter
-- Left Stick = nudge the HUD position
+## HUD messaging
 
-This keeps your view open while still giving you the exact controls you need.
+The HUD is intentionally kept at the lower center of each eye view and gives direct instructions in real time:
+
+- Mode: explore or place
+- Points: current count
+- X: finish item or need more points
+- A: add point or open nearest
+
+This keeps the experience centered around the scene instead of cluttering it with floating menus.
 
 ## XR behavior
 
-- The app starts in VR mode automatically.
-- The HUD is intentionally kept low and centered so it does not block the center of the view.
-- Hitboxes are created from at least four points and the final point connects back to the first to form the shape.
-- When you activate a hitbox, the media item assigned to it appears in the immersive viewer.
+- the app defaults to stereo/VR-first behavior
+- the environment uses an immersive sci-fi room with a subtle grid and glow so it feels like a proper XR space
+- media files can be dropped into a dedicated folder and loaded from the library panel
+- the app is designed to be used in VR/XR mode, not as a desktop-heavy interface
 
 ## Notes
 
-- This is a personal immersive workspace and is intended to be used in VR mode.
-- The HUD is the only menu-style overlay and is designed to stay out of the center of the scene.
+- This repo is meant for personal use and rapid XR prototyping.
+- The main interaction model is immersive, with the HUD as a light guide rather than a menu system.

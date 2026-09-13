@@ -56,7 +56,7 @@ const state = {
   menuHolding: false,
   selectedAssetId: null,
   stereoEnabled: true,
-  hudVisible: false,
+  hudVisible: true,
   hitboxPlacementMode: false,
 }
 
@@ -101,9 +101,57 @@ function refreshPointMarkers() {
   });
 }
 
+function buildImmersiveEnvironment() {
+  const backgroundGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(16, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0x0b2032, side: THREE.BackSide, transparent: true, opacity: 0.88 }),
+  );
+  scene.add(backgroundGlow);
+
+  const floor = new THREE.GridHelper(30, 30, 0x7ef3ff, 0x204b63);
+  floor.position.y = -1.15;
+  floor.material.transparent = true;
+  floor.material.opacity = 0.36;
+  scene.add(floor);
+
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(2.8, 0.025, 18, 96),
+    new THREE.MeshBasicMaterial({ color: 0x8ae9ff, transparent: true, opacity: 0.8 }),
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = -1.08;
+  scene.add(ring);
+
+  const starPositions = [];
+  for (let i = 0; i < 700; i += 1) {
+    starPositions.push(
+      (Math.random() - 0.5) * 18,
+      Math.random() * 10 + 1,
+      (Math.random() - 0.5) * 18,
+    );
+  }
+
+  const starField = new THREE.Points(
+    new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3)),
+    new THREE.PointsMaterial({ color: 0xbfefff, size: 0.04, transparent: true, opacity: 0.85 }),
+  );
+  scene.add(starField);
+
+  scene.userData.worldEffects = { backgroundGlow, floor, ring, starField };
+}
+
 function renderFrame() {
   camera.quaternion.slerp(camera.userData.targetQuaternion, 0.12);
   camera.updateMatrixWorld();
+
+  const worldEffects = scene?.userData?.worldEffects;
+  if (worldEffects) {
+    const t = performance.now() * 0.0006;
+    worldEffects.ring.rotation.z = t * 1.2;
+    worldEffects.ring.scale.setScalar(1 + Math.sin(t * 2.2) * 0.08);
+    worldEffects.starField.rotation.y += 0.0008;
+    worldEffects.backgroundGlow.rotation.y = t * 0.4;
+  }
 
   if (state.stereoEnabled && !renderer.xr.isPresenting) {
     const width = renderer.domElement.clientWidth || innerWidth;
@@ -155,6 +203,7 @@ function setupScene() {
 
   pointAnchorGroup = new THREE.Group();
   scene.add(pointAnchorGroup);
+  buildImmersiveEnvironment();
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
   renderer.xr.enabled = true;
@@ -584,8 +633,11 @@ function updateHudStatus() {
   }
 
   if (state.hitboxPlacementMode) {
-    const finishText = pointCount >= minPoints ? '<span class="button-tag">X</span> finish item' : '<span class="button-tag">X</span> need ' + Math.max(0, minPoints - pointCount) + ' more';
+    const finishText = pointCount >= minPoints
+      ? '<span class="button-tag">X</span> finish item'
+      : '<span class="button-tag">X</span> need ' + Math.max(0, minPoints - pointCount) + ' more';
     const builder = [
+      '<div><span class="button-tag">Mode</span> place</div>',
       '<div><span class="button-tag">Points</span> ' + pointCount + '</div>',
       '<div>' + finishText + '</div>',
       '<div><span class="button-tag">A</span> add point</div>',
@@ -597,10 +649,11 @@ function updateHudStatus() {
   }
 
   const normal = [
-    '<div><span class="button-tag">Start</span> toggle HUD</div>',
+    '<div><span class="button-tag">Mode</span> explore</div>',
+    '<div><span class="button-tag">Start</span> HUD</div>',
     '<div><span class="button-tag">A</span> open nearest</div>',
     '<div><span class="button-tag">X</span> recenter</div>',
-    '<div><span class="button-tag">L3/B10</span> hitbox mode</div>',
+    '<div><span class="button-tag">L3/B10</span> place</div>',
   ].join('');
   hudLeftText.innerHTML = normal;
   hudRightText.innerHTML = normal;
@@ -640,14 +693,13 @@ function setVrMode(enabled) {
   document.body.classList.toggle('vr-mode', enabled);
   if (enabled) {
     document.body.classList.add('xr-session');
+    setHudVisible(true);
   } else {
     document.body.classList.remove('xr-session');
+    setHudVisible(false);
   }
   if (vrReticleLeft) vrReticleLeft.style.opacity = enabled ? '1' : '0';
   if (vrReticleRight) vrReticleRight.style.opacity = enabled ? '1' : '0';
-  if (hudPanel && !enabled) {
-    setHudVisible(false);
-  }
 }
 
 async function startXRSession(mode) {
@@ -779,7 +831,7 @@ window.addEventListener('resize', () => {
 setupScene();
 setUpInteractions();
 requestSensorPermission();
-setHudVisible(false);
+setHudVisible(true);
 setVrMode(true);
 setCameraMode('rear');
 renderAssetList();
